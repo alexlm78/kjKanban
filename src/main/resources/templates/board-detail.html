@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${board.name} + ' - KJ Kanban'">Board - KJ Kanban</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/kanban.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-columns"></i>
+                <span>KJ Kanban</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/boards" class="nav-link">Boards</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="board-header">
+            <div class="container">
+                <div class="board-title">
+                    <h1 th:text="${board.name}">Board Name</h1>
+                    <p th:text="${board.description}" th:if="${board.description}">Board description</p>
+                </div>
+                <div class="board-actions">
+                    <button class="btn btn-outline" onclick="addColumn()">
+                        <i class="fas fa-plus"></i> Add Column
+                    </button>
+                    <button class="btn btn-primary" onclick="addTask()">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="kanban-board" id="kanbanBoard" th:data-board-id="${board.id}">
+            <div class="kanban-columns" id="kanbanColumns">
+                <!-- Columns will be loaded dynamically -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Column Modal -->
+    <div id="columnModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="columnModalTitle">Add Column</h3>
+                <button class="modal-close" onclick="closeColumnModal()" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="columnForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="columnName">Column Name</label>
+                        <input type="text" id="columnName" name="name" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="columnColor">Color</label>
+                        <div class="color-picker">
+                            <input type="color" id="columnColor" name="color" value="#3498db">
+                            <div class="color-presets">
+                                <button type="button" class="color-preset" data-color="#e74c3c" style="background-color: #e74c3c;" title="Red"></button>
+                                <button type="button" class="color-preset" data-color="#f39c12" style="background-color: #f39c12;" title="Orange"></button>
+                                <button type="button" class="color-preset" data-color="#27ae60" style="background-color: #27ae60;" title="Green"></button>
+                                <button type="button" class="color-preset" data-color="#3498db" style="background-color: #3498db;" title="Blue"></button>
+                                <button type="button" class="color-preset" data-color="#9b59b6" style="background-color: #9b59b6;" title="Purple"></button>
+                                <button type="button" class="color-preset" data-color="#34495e" style="background-color: #34495e;" title="Dark Gray"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeColumnModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Column</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="taskModalTitle">Add Task</h3>
+                <button class="modal-close" onclick="closeTaskModal()" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="taskForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="taskTitle">Task Title</label>
+                        <input type="text" id="taskTitle" name="title" required maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Description</label>
+                        <textarea id="taskDescription" name="description" rows="3" maxlength="1000"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskPriority">Priority</label>
+                            <select id="taskPriority" name="priority">
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM" selected>Medium</option>
+                                <option value="HIGH">High</option>
+                                <option value="URGENT">Urgent</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskColumn">Column</label>
+                            <select id="taskColumn" name="columnId" required>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskColor">Color</label>
+                            <input type="color" id="taskColor" name="color" value="#ffffff">
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDueDate">Due Date</label>
+                            <input type="datetime-local" id="taskDueDate" name="dueDate">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeTaskModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/kanban.js"></script>
+    <div id="boardIdContainer" th:data-board-id="${board.id}" style="display: none;"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const boardId = parseInt(document.getElementById('boardIdContainer').getAttribute('data-board-id'));
+            initializeKanbanBoard(boardId);
+        });
+    </script>
+</body>
+</html>

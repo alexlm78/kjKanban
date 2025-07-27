@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KJ Kanban - Project Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-columns"></i>
+                <span>KJ Kanban</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link active">Dashboard</a>
+                <a href="/boards" class="nav-link">Boards</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Welcome to KJ Kanban</h1>
+                <p>Organize your projects with powerful Kanban boards</p>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 th:text="${boards.size()}">0</h3>
+                        <p>Total Boards</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalTasks">0</h3>
+                        <p>Total Tasks</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="activeTasks">0</h3>
+                        <p>Active Tasks</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2>Recent Boards</h2>
+                    <a href="/boards/new" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Board
+                    </a>
+                </div>
+
+                <div class="boards-grid" th:if="${not #lists.isEmpty(boards)}">
+                    <div class="board-card" th:each="board : ${boards}" th:if="${boardStat.index < 6}">
+                        <div class="board-header">
+                            <h3 th:text="${board.name}">Board Name</h3>
+                            <div class="board-actions">
+                                <a th:href="@{/boards/{id}(id=${board.id})}" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a th:href="@{/boards/{id}/edit(id=${board.id})}" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <p class="board-description" th:text="${board.description ?: 'No description'}">Board description</p>
+                        <div class="board-meta">
+                            <span class="board-columns">
+                                <i class="fas fa-columns"></i>
+                                <span th:text="${board.columns.size()}">0</span> columns
+                            </span>
+                            <span class="board-date" th:text="${#temporals.format(board.createdAt, 'MMM dd, yyyy')}">Date</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-state" th:if="${#lists.isEmpty(boards)}">
+                    <div class="empty-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>No boards yet</h3>
+                    <p>Create your first Kanban board to get started</p>
+                    <a href="/boards/new" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create First Board
+                    </a>
+                </div>
+
+                <div class="section-footer" th:if="${boards.size() > 6}">
+                    <a href="/boards" class="btn btn-outline">View All Boards</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // Load dashboard statistics
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardStats();
+        });
+
+        async function loadDashboardStats() {
+            try {
+                const boards = /*[[${boards}]]*/ [];
+                let totalTasks = 0;
+                let activeTasks = 0;
+
+                for (const board of boards) {
+                    const response = await fetch(`/api/boards/${board.id}/tasks/count`);
+                    if (response.ok) {
+                        const count = await response.json();
+                        totalTasks += count;
+                        // For simplicity, consider all tasks as active
+                        activeTasks += count;
+                    }
+                }
+
+                document.getElementById('totalTasks').textContent = totalTasks;
+                document.getElementById('activeTasks').textContent = activeTasks;
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+    </script>
+</body>
+</html>
