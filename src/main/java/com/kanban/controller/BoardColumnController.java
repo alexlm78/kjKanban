@@ -23,20 +23,20 @@ public class BoardColumnController {
     }
     
     @GetMapping("/boards/{boardId}/columns")
-    public ResponseEntity<List<BoardColumn>> getColumnsByBoardId(@PathVariable Long boardId) {
+    public ResponseEntity<List<BoardColumn>> getColumnsByBoardId(@PathVariable String boardId) {
         List<BoardColumn> columns = columnService.getColumnsByBoardId(boardId);
         return ResponseEntity.ok(columns);
     }
     
     @GetMapping("/columns/{id}")
-    public ResponseEntity<BoardColumn> getColumnById(@PathVariable Long id) {
+    public ResponseEntity<BoardColumn> getColumnById(@PathVariable String id) {
         return columnService.getColumnById(id)
                 .map(column -> ResponseEntity.ok(column))
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping("/boards/{boardId}/columns")
-    public ResponseEntity<?> createColumn(@PathVariable Long boardId, @Valid @RequestBody BoardColumn column) {
+    public ResponseEntity<?> createColumn(@PathVariable String boardId, @Valid @RequestBody BoardColumn column) {
         try {
             BoardColumn createdColumn = columnService.createColumn(boardId, column);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdColumn);
@@ -46,7 +46,7 @@ public class BoardColumnController {
     }
     
     @PutMapping("/columns/{id}")
-    public ResponseEntity<?> updateColumn(@PathVariable Long id, @Valid @RequestBody BoardColumn columnDetails) {
+    public ResponseEntity<?> updateColumn(@PathVariable String id, @Valid @RequestBody BoardColumn columnDetails) {
         try {
             BoardColumn updatedColumn = columnService.updateColumn(id, columnDetails);
             return ResponseEntity.ok(updatedColumn);
@@ -56,7 +56,7 @@ public class BoardColumnController {
     }
     
     @DeleteMapping("/columns/{id}")
-    public ResponseEntity<?> deleteColumn(@PathVariable Long id) {
+    public ResponseEntity<?> deleteColumn(@PathVariable String id) {
         try {
             columnService.deleteColumn(id);
             return ResponseEntity.ok(new BoardController.SuccessResponse("Column deleted successfully"));
@@ -66,7 +66,7 @@ public class BoardColumnController {
     }
     
     @PutMapping("/columns/{id}/move")
-    public ResponseEntity<?> moveColumn(@PathVariable Long id, @RequestBody MoveColumnRequest request) {
+    public ResponseEntity<?> moveColumn(@PathVariable String id, @RequestBody MoveColumnRequest request) {
         try {
             columnService.moveColumn(id, request.getNewPosition());
             return ResponseEntity.ok(new BoardController.SuccessResponse("Column moved successfully"));

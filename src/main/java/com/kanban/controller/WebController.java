@@ -30,7 +30,7 @@ public class WebController {
     }
     
     @GetMapping("/boards/{id}")
-    public String boardDetail(@PathVariable Long id, Model model) {
+    public String boardDetail(@PathVariable String id, Model model) {
         return boardService.getBoardById(id)
                 .map(board -> {
                     model.addAttribute("board", board);
@@ -45,7 +45,7 @@ public class WebController {
     }
     
     @GetMapping("/boards/{id}/edit")
-    public String editBoard(@PathVariable Long id, Model model) {
+    public String editBoard(@PathVariable String id, Model model) {
         return boardService.getBoardById(id)
                 .map(board -> {
                     model.addAttribute("board", board);

@@ -6,13 +6,10 @@ import com.kanban.repository.BoardColumnRepository;
 import com.kanban.repository.BoardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class BoardColumnService {
     
     private final BoardColumnRepository columnRepository;
@@ -24,17 +21,15 @@ public class BoardColumnService {
         this.boardRepository = boardRepository;
     }
     
-    @Transactional(readOnly = true)
-    public List<BoardColumn> getColumnsByBoardId(Long boardId) {
-        return columnRepository.findByBoardIdWithTasks(boardId);
+    public List<BoardColumn> getColumnsByBoardId(String boardId) {
+        return columnRepository.findByBoardId(boardId);
     }
     
-    @Transactional(readOnly = true)
-    public Optional<BoardColumn> getColumnById(Long id) {
-        return columnRepository.findByIdWithTasks(id);
+    public Optional<BoardColumn> getColumnById(String id) {
+        return columnRepository.findById(id);
     }
     
-    public BoardColumn createColumn(Long boardId, BoardColumn column) {
+    public BoardColumn createColumn(String boardId, BoardColumn column) {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found with id: " + boardId));
         
@@ -43,20 +38,20 @@ public class BoardColumnService {
         }
         
         // Set position to the end
-        Integer maxPosition = columnRepository.findMaxPositionByBoardId(boardId);
-        column.setPosition(maxPosition != null ? maxPosition + 1 : 0);
-        column.setBoard(board);
+        List<BoardColumn> existingColumns = columnRepository.findByBoardId(boardId);
+        column.setPosition(existingColumns.size());
+        column.setBoardId(boardId);
         
         return columnRepository.save(column);
     }
     
-    public BoardColumn updateColumn(Long id, BoardColumn columnDetails) {
+    public BoardColumn updateColumn(String id, BoardColumn columnDetails) {
         BoardColumn column = columnRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Column not found with id: " + id));
         
         // Check if name is being changed and if new name already exists in the same board
         if (!column.getName().equals(columnDetails.getName()) && 
-            columnRepository.existsByBoardIdAndName(column.getBoard().getId(), columnDetails.getName())) {
+            columnRepository.existsByBoardIdAndName(column.getBoardId(), columnDetails.getName())) {
             throw new IllegalArgumentException("Column with name '" + columnDetails.getName() + "' already exists in this board");
         }
         
@@ -66,21 +61,21 @@ public class BoardColumnService {
         return columnRepository.save(column);
     }
     
-    public void deleteColumn(Long id) {
+    public void deleteColumn(String id) {
         BoardColumn column = columnRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Column not found with id: " + id));
         
         columnRepository.delete(column);
         
         // Reorder remaining columns
-        reorderColumns(column.getBoard().getId());
+        reorderColumns(column.getBoardId());
     }
     
-    public void moveColumn(Long columnId, int newPosition) {
+    public void moveColumn(String columnId, int newPosition) {
         BoardColumn column = columnRepository.findById(columnId)
                 .orElseThrow(() -> new IllegalArgumentException("Column not found with id: " + columnId));
         
-        List<BoardColumn> columns = columnRepository.findByBoardIdOrderByPosition(column.getBoard().getId());
+        List<BoardColumn> columns = columnRepository.findByBoardId(column.getBoardId());
         
         // Remove column from current position
         columns.remove(column);
@@ -99,16 +94,15 @@ public class BoardColumnService {
         }
     }
     
-    private void reorderColumns(Long boardId) {
-        List<BoardColumn> columns = columnRepository.findByBoardIdOrderByPosition(boardId);
+    private void reorderColumns(String boardId) {
+        List<BoardColumn> columns = columnRepository.findByBoardId(boardId);
         for (int i = 0; i < columns.size(); i++) {
             columns.get(i).setPosition(i);
             columnRepository.save(columns.get(i));
         }
     }
     
-    @Transactional(readOnly = true)
-    public boolean columnExists(Long id) {
+    public boolean columnExists(String id) {
         return columnRepository.existsById(id);
     }
 }

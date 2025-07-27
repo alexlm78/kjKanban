@@ -6,13 +6,10 @@ import com.kanban.repository.BoardRepository;
 import com.kanban.repository.BoardColumnRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class BoardService {
     
     private final BoardRepository boardRepository;
@@ -24,14 +21,12 @@ public class BoardService {
         this.columnRepository = columnRepository;
     }
     
-    @Transactional(readOnly = true)
     public List<Board> getAllBoards() {
         return boardRepository.findAllByOrderByCreatedAtDesc();
     }
     
-    @Transactional(readOnly = true)
-    public Optional<Board> getBoardById(Long id) {
-        return boardRepository.findByIdWithColumnsAndTasks(id);
+    public Optional<Board> getBoardById(String id) {
+        return boardRepository.findById(id);
     }
     
     public Board createBoard(Board board) {
@@ -47,7 +42,7 @@ public class BoardService {
         return savedBoard;
     }
     
-    public Board updateBoard(Long id, Board boardDetails) {
+    public Board updateBoard(String id, Board boardDetails) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found with id: " + id));
         
@@ -63,10 +58,12 @@ public class BoardService {
         return boardRepository.save(board);
     }
     
-    public void deleteBoard(Long id) {
+    public void deleteBoard(String id) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found with id: " + id));
         
+        // Delete associated columns and tasks
+        columnRepository.deleteByBoardId(id);
         boardRepository.delete(board);
     }
     
@@ -77,17 +74,15 @@ public class BoardService {
         for (int i = 0; i < defaultColumnNames.length; i++) {
             BoardColumn column = new BoardColumn(defaultColumnNames[i], i);
             column.setColor(defaultColors[i]);
-            column.setBoard(board);
+            column.setBoardId(board.getId());
             columnRepository.save(column);
         }
     }
     
-    @Transactional(readOnly = true)
-    public boolean boardExists(Long id) {
+    public boolean boardExists(String id) {
         return boardRepository.existsById(id);
     }
     
-    @Transactional(readOnly = true)
     public boolean boardNameExists(String name) {
         return boardRepository.existsByName(name);
     }

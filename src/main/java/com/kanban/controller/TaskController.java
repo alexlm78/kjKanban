@@ -24,26 +24,26 @@ public class TaskController {
     }
     
     @GetMapping("/columns/{columnId}/tasks")
-    public ResponseEntity<List<Task>> getTasksByColumnId(@PathVariable Long columnId) {
+    public ResponseEntity<List<Task>> getTasksByColumnId(@PathVariable String columnId) {
         List<Task> tasks = taskService.getTasksByColumnId(columnId);
         return ResponseEntity.ok(tasks);
     }
     
     @GetMapping("/boards/{boardId}/tasks")
-    public ResponseEntity<List<Task>> getTasksByBoardId(@PathVariable Long boardId) {
+    public ResponseEntity<List<Task>> getTasksByBoardId(@PathVariable String boardId) {
         List<Task> tasks = taskService.getTasksByBoardId(boardId);
         return ResponseEntity.ok(tasks);
     }
     
     @GetMapping("/tasks/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<Task> getTaskById(@PathVariable String id) {
         return taskService.getTaskById(id)
                 .map(task -> ResponseEntity.ok(task))
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping("/columns/{columnId}/tasks")
-    public ResponseEntity<?> createTask(@PathVariable Long columnId, @Valid @RequestBody Task task) {
+    public ResponseEntity<?> createTask(@PathVariable String columnId, @Valid @RequestBody Task task) {
         try {
             Task createdTask = taskService.createTask(columnId, task);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
@@ -53,7 +53,7 @@ public class TaskController {
     }
     
     @PutMapping("/tasks/{id}")
-    public ResponseEntity<?> updateTask(@PathVariable Long id, @Valid @RequestBody Task taskDetails) {
+    public ResponseEntity<?> updateTask(@PathVariable String id, @Valid @RequestBody Task taskDetails) {
         try {
             Task updatedTask = taskService.updateTask(id, taskDetails);
             return ResponseEntity.ok(updatedTask);
@@ -63,7 +63,7 @@ public class TaskController {
     }
     
     @DeleteMapping("/tasks/{id}")
-    public ResponseEntity<?> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<?> deleteTask(@PathVariable String id) {
         try {
             taskService.deleteTask(id);
             return ResponseEntity.ok(new BoardController.SuccessResponse("Task deleted successfully"));
@@ -73,7 +73,7 @@ public class TaskController {
     }
     
     @PutMapping("/tasks/{id}/move")
-    public ResponseEntity<?> moveTask(@PathVariable Long id, @RequestBody MoveTaskRequest request) {
+    public ResponseEntity<?> moveTask(@PathVariable String id, @RequestBody MoveTaskRequest request) {
         try {
             Task movedTask = taskService.moveTask(id, request.getNewColumnId(), request.getNewPosition());
             return ResponseEntity.ok(movedTask);
@@ -97,21 +97,21 @@ public class TaskController {
     }
     
     @GetMapping("/boards/{boardId}/tasks/count")
-    public ResponseEntity<Long> getTaskCountByBoardId(@PathVariable Long boardId) {
+    public ResponseEntity<Long> getTaskCountByBoardId(@PathVariable String boardId) {
         Long count = taskService.getTaskCountByBoardId(boardId);
         return ResponseEntity.ok(count);
     }
     
     // Request DTOs
     public static class MoveTaskRequest {
-        private Long newColumnId;
+        private String newColumnId;
         private int newPosition;
         
-        public Long getNewColumnId() {
+        public String getNewColumnId() {
             return newColumnId;
         }
         
-        public void setNewColumnId(Long newColumnId) {
+        public void setNewColumnId(String newColumnId) {
             this.newColumnId = newColumnId;
         }
         

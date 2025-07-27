@@ -2,45 +2,37 @@ package com.kanban.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "board_columns")
+@Document(collection = "board_columns")
 public class BoardColumn {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     
     @NotBlank(message = "Column name is required")
     @Size(max = 100, message = "Column name must not exceed 100 characters")
-    @Column(nullable = false)
     private String name;
     
-    @Column(nullable = false)
     private Integer position;
     
     @Size(max = 7, message = "Color must be a valid hex color")
     private String color = "#3498db";
     
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
-    @JsonBackReference
-    private Board board;
+    private String boardId;
     
-    @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OrderBy("position ASC")
+    @DBRef
     @JsonManagedReference
     private List<Task> tasks = new ArrayList<>();
     
@@ -54,17 +46,16 @@ public class BoardColumn {
         this.position = position;
     }
     
-    @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
     
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
     
@@ -108,12 +99,12 @@ public class BoardColumn {
         this.updatedAt = updatedAt;
     }
     
-    public Board getBoard() {
-        return board;
+    public String getBoardId() {
+        return boardId;
     }
     
-    public void setBoard(Board board) {
-        this.board = board;
+    public void setBoardId(String boardId) {
+        this.boardId = boardId;
     }
     
     public List<Task> getTasks() {
@@ -126,11 +117,11 @@ public class BoardColumn {
     
     public void addTask(Task task) {
         tasks.add(task);
-        task.setColumn(this);
+        task.setColumnId(this.id);
     }
     
     public void removeTask(Task task) {
         tasks.remove(task);
-        task.setColumn(null);
+        task.setColumnId(null);
     }
 }

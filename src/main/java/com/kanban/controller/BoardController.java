@@ -29,7 +29,7 @@ public class BoardController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Board> getBoardById(@PathVariable Long id) {
+    public ResponseEntity<Board> getBoardById(@PathVariable String id) {
         return boardService.getBoardById(id)
                 .map(board -> ResponseEntity.ok(board))
                 .orElse(ResponseEntity.notFound().build());
@@ -46,7 +46,7 @@ public class BoardController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateBoard(@PathVariable Long id, @Valid @RequestBody Board boardDetails) {
+    public ResponseEntity<?> updateBoard(@PathVariable String id, @Valid @RequestBody Board boardDetails) {
         try {
             Board updatedBoard = boardService.updateBoard(id, boardDetails);
             return ResponseEntity.ok(updatedBoard);
@@ -56,7 +56,7 @@ public class BoardController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
+    public ResponseEntity<?> deleteBoard(@PathVariable String id) {
         try {
             boardService.deleteBoard(id);
             return ResponseEntity.ok(new SuccessResponse("Board deleted successfully"));
@@ -66,7 +66,7 @@ public class BoardController {
     }
     
     @GetMapping("/{id}/exists")
-    public ResponseEntity<Boolean> boardExists(@PathVariable Long id) {
+    public ResponseEntity<Boolean> boardExists(@PathVariable String id) {
         boolean exists = boardService.boardExists(id);
         return ResponseEntity.ok(exists);
     }

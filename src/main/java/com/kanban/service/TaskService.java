@@ -6,14 +6,11 @@ import com.kanban.repository.BoardColumnRepository;
 import com.kanban.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class TaskService {
     
     private final TaskRepository taskRepository;
@@ -25,34 +22,31 @@ public class TaskService {
         this.columnRepository = columnRepository;
     }
     
-    @Transactional(readOnly = true)
-    public List<Task> getTasksByColumnId(Long columnId) {
-        return taskRepository.findByColumnIdOrderByPosition(columnId);
+    public List<Task> getTasksByColumnId(String columnId) {
+        return taskRepository.findByColumnId(columnId);
     }
     
-    @Transactional(readOnly = true)
-    public Optional<Task> getTaskById(Long id) {
+    public Optional<Task> getTaskById(String id) {
         return taskRepository.findById(id);
     }
     
-    @Transactional(readOnly = true)
-    public List<Task> getTasksByBoardId(Long boardId) {
-        return taskRepository.findByBoardIdOrderByCreatedAtDesc(boardId);
+    public List<Task> getTasksByBoardId(String boardId) {
+        return taskRepository.findByColumnId(boardId);
     }
     
-    public Task createTask(Long columnId, Task task) {
+    public Task createTask(String columnId, Task task) {
         BoardColumn column = columnRepository.findById(columnId)
                 .orElseThrow(() -> new IllegalArgumentException("Column not found with id: " + columnId));
         
         // Set position to the end of the column
-        Integer maxPosition = taskRepository.findMaxPositionByColumnId(columnId);
-        task.setPosition(maxPosition != null ? maxPosition + 1 : 0);
-        task.setColumn(column);
+        List<Task> existingTasks = taskRepository.findByColumnId(columnId);
+        task.setPosition(existingTasks.size());
+        task.setColumnId(columnId);
         
         return taskRepository.save(task);
     }
     
-    public Task updateTask(Long id, Task taskDetails) {
+    public Task updateTask(String id, Task taskDetails) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id));
         
@@ -65,31 +59,31 @@ public class TaskService {
         return taskRepository.save(task);
     }
     
-    public void deleteTask(Long id) {
+    public void deleteTask(String id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id));
         
-        Long columnId = task.getColumn().getId();
+        String columnId = task.getColumnId();
         taskRepository.delete(task);
         
         // Reorder remaining tasks in the column
         reorderTasks(columnId);
     }
     
-    public Task moveTask(Long taskId, Long newColumnId, int newPosition) {
+    public Task moveTask(String taskId, String newColumnId, int newPosition) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + taskId));
         
         BoardColumn newColumn = columnRepository.findById(newColumnId)
                 .orElseThrow(() -> new IllegalArgumentException("Column not found with id: " + newColumnId));
         
-        Long oldColumnId = task.getColumn().getId();
+        String oldColumnId = task.getColumnId();
         
         // Update task's column
-        task.setColumn(newColumn);
+        task.setColumnId(newColumnId);
         
         // Get tasks in the new column
-        List<Task> tasksInNewColumn = taskRepository.findByColumnIdOrderByPosition(newColumnId);
+        List<Task> tasksInNewColumn = taskRepository.findByColumnId(newColumnId);
         
         // Remove task if it was already in this column
         tasksInNewColumn.removeIf(t -> t.getId().equals(taskId));
@@ -115,31 +109,27 @@ public class TaskService {
         return task;
     }
     
-    private void reorderTasks(Long columnId) {
-        List<Task> tasks = taskRepository.findByColumnIdOrderByPosition(columnId);
+    private void reorderTasks(String columnId) {
+        List<Task> tasks = taskRepository.findByColumnId(columnId);
         for (int i = 0; i < tasks.size(); i++) {
             tasks.get(i).setPosition(i);
             taskRepository.save(tasks.get(i));
         }
     }
     
-    @Transactional(readOnly = true)
     public List<Task> getTasksDueBetween(LocalDateTime start, LocalDateTime end) {
-        return taskRepository.findTasksDueBetween(start, end);
+        return taskRepository.findByDueDateBetween(start, end);
     }
     
-    @Transactional(readOnly = true)
     public List<Task> getTasksByPriority(Task.Priority priority) {
         return taskRepository.findByPriority(priority);
     }
     
-    @Transactional(readOnly = true)
-    public Long getTaskCountByBoardId(Long boardId) {
-        return taskRepository.countTasksByBoardId(boardId);
+    public Long getTaskCountByBoardId(String boardId) {
+        return (long) taskRepository.findByColumnId(boardId).size();
     }
     
-    @Transactional(readOnly = true)
-    public boolean taskExists(Long id) {
+    public boolean taskExists(String id) {
         return taskRepository.existsById(id);
     }
 }

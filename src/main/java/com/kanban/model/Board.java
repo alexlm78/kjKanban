@@ -1,37 +1,33 @@
 package com.kanban.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "boards")
+@Document(collection = "boards")
 public class Board {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     
     @NotBlank(message = "Board name is required")
     @Size(max = 100, message = "Board name must not exceed 100 characters")
-    @Column(nullable = false)
     private String name;
     
     @Size(max = 500, message = "Description must not exceed 500 characters")
     private String description;
     
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OrderBy("position ASC")
+    @DBRef
     @JsonManagedReference
     private List<BoardColumn> columns = new ArrayList<>();
     
@@ -45,17 +41,16 @@ public class Board {
         this.description = description;
     }
     
-    @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
     
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
     
@@ -101,11 +96,11 @@ public class Board {
     
     public void addColumn(BoardColumn column) {
         columns.add(column);
-        column.setBoard(this);
+        column.setBoardId(this.id);
     }
     
     public void removeColumn(BoardColumn column) {
         columns.remove(column);
-        column.setBoard(null);
+        column.setBoardId(null);
     }
 }

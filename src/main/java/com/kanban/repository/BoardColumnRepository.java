@@ -1,27 +1,24 @@
 package com.kanban.repository;
 
 import com.kanban.model.BoardColumn;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BoardColumnRepository extends JpaRepository<BoardColumn, Long> {
+public interface BoardColumnRepository extends MongoRepository<BoardColumn, String> {
     
-    List<BoardColumn> findByBoardIdOrderByPosition(Long boardId);
+    List<BoardColumn> findByBoardIdOrderByPosition(String boardId);
     
-    @Query("SELECT c FROM BoardColumn c LEFT JOIN FETCH c.tasks WHERE c.board.id = :boardId ORDER BY c.position")
-    List<BoardColumn> findByBoardIdWithTasks(@Param("boardId") Long boardId);
+    Optional<BoardColumn> findById(String id);
     
-    @Query("SELECT c FROM BoardColumn c LEFT JOIN FETCH c.tasks WHERE c.id = :id")
-    Optional<BoardColumn> findByIdWithTasks(@Param("id") Long id);
+    @Query("{ 'boardId': ?0 }")
+    List<BoardColumn> findByBoardId(String boardId);
     
-    @Query("SELECT MAX(c.position) FROM BoardColumn c WHERE c.board.id = :boardId")
-    Integer findMaxPositionByBoardId(@Param("boardId") Long boardId);
+    boolean existsByBoardIdAndName(String boardId, String name);
     
-    boolean existsByBoardIdAndName(Long boardId, String name);
+    void deleteByBoardId(String boardId);
 }

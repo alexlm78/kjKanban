@@ -1,51 +1,39 @@
 package com.kanban.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "tasks")
+@Document(collection = "tasks")
 public class Task {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     
     @NotBlank(message = "Task title is required")
     @Size(max = 200, message = "Task title must not exceed 200 characters")
-    @Column(nullable = false)
     private String title;
     
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
-    @Column(columnDefinition = "TEXT")
     private String description;
     
-    @Column(nullable = false)
     private Integer position;
     
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Priority priority = Priority.MEDIUM;
     
     @Size(max = 7, message = "Color must be a valid hex color")
     private String color = "#ffffff";
     
-    @Column(name = "due_date")
     private LocalDateTime dueDate;
     
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "column_id", nullable = false)
-    @JsonBackReference
-    private BoardColumn column;
+    private String columnId;
     
     public enum Priority {
         LOW("Low"),
@@ -74,17 +62,16 @@ public class Task {
         this.description = description;
     }
     
-    @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
     
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
     
@@ -152,11 +139,11 @@ public class Task {
         this.updatedAt = updatedAt;
     }
     
-    public BoardColumn getColumn() {
-        return column;
+    public String getColumnId() {
+        return columnId;
     }
     
-    public void setColumn(BoardColumn column) {
-        this.column = column;
+    public void setColumnId(String columnId) {
+        this.columnId = columnId;
     }
 }
