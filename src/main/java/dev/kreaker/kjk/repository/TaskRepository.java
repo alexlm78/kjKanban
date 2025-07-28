@@ -1,6 +1,6 @@
-package com.kanban.repository;
+package dev.kreaker.kjk.repository;
 
-import com.kanban.model.Task;
+import dev.kreaker.kjk.model.Task;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;

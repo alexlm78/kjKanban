@@ -1,6 +1,6 @@
-package com.kanban.model;
+package dev.kreaker.kjk.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -10,35 +10,38 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Document(collection = "boards")
-public class Board {
+@Document(collection = "board_columns")
+public class BoardColumn {
     
     @Id
     private String id;
     
-    @NotBlank(message = "Board name is required")
-    @Size(max = 100, message = "Board name must not exceed 100 characters")
+    @NotBlank(message = "Column name is required")
+    @Size(max = 100, message = "Column name must not exceed 100 characters")
     private String name;
     
-    @Size(max = 500, message = "Description must not exceed 500 characters")
-    private String description;
+    private Integer position;
+    
+    @Size(max = 7, message = "Color must be a valid hex color")
+    private String color = "#3498db";
     
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
     
-    @DBRef
-    @JsonManagedReference
-    private List<BoardColumn> columns = new ArrayList<>();
+    private String boardId;
     
-    public Board() {
+    @DBRef
+    private List<Task> tasks = new ArrayList<>();
+    
+    public BoardColumn() {
         this.createdAt = LocalDateTime.now();
     }
     
-    public Board(String name, String description) {
+    public BoardColumn(String name, Integer position) {
         this();
         this.name = name;
-        this.description = description;
+        this.position = position;
     }
     
     public void preUpdate() {
@@ -62,12 +65,20 @@ public class Board {
         this.name = name;
     }
     
-    public String getDescription() {
-        return description;
+    public Integer getPosition() {
+        return position;
     }
     
-    public void setDescription(String description) {
-        this.description = description;
+    public void setPosition(Integer position) {
+        this.position = position;
+    }
+    
+    public String getColor() {
+        return color;
+    }
+    
+    public void setColor(String color) {
+        this.color = color;
     }
     
     public LocalDateTime getCreatedAt() {
@@ -86,21 +97,29 @@ public class Board {
         this.updatedAt = updatedAt;
     }
     
-    public List<BoardColumn> getColumns() {
-        return columns;
+    public String getBoardId() {
+        return boardId;
     }
     
-    public void setColumns(List<BoardColumn> columns) {
-        this.columns = columns;
+    public void setBoardId(String boardId) {
+        this.boardId = boardId;
     }
     
-    public void addColumn(BoardColumn column) {
-        columns.add(column);
-        column.setBoardId(this.id);
+    public List<Task> getTasks() {
+        return tasks;
     }
     
-    public void removeColumn(BoardColumn column) {
-        columns.remove(column);
-        column.setBoardId(null);
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
+    }
+    
+    public void addTask(Task task) {
+        tasks.add(task);
+        task.setColumnId(this.id);
+    }
+    
+    public void removeTask(Task task) {
+        tasks.remove(task);
+        task.setColumnId(null);
     }
 }

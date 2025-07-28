@@ -1,7 +1,7 @@
-package com.kanban.controller;
+package dev.kreaker.kjk.controller;
 
-import com.kanban.model.Task;
-import com.kanban.service.TaskService;
+import dev.kreaker.kjk.model.Task;
+import dev.kreaker.kjk.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

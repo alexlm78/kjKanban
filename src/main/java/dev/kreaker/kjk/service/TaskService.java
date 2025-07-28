@@ -1,9 +1,9 @@
-package com.kanban.service;
+package dev.kreaker.kjk.service;
 
-import com.kanban.model.BoardColumn;
-import com.kanban.model.Task;
-import com.kanban.repository.BoardColumnRepository;
-import com.kanban.repository.TaskRepository;
+import dev.kreaker.kjk.model.BoardColumn;
+import dev.kreaker.kjk.model.Task;
+import dev.kreaker.kjk.repository.BoardColumnRepository;
+import dev.kreaker.kjk.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;

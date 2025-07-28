@@ -1,6 +1,6 @@
-package com.kanban.model;
+package dev.kreaker.kjk.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;

@@ -1,6 +1,6 @@
-package com.kanban.repository;
+package dev.kreaker.kjk.repository;
 
-import com.kanban.model.BoardColumn;
+import dev.kreaker.kjk.model.BoardColumn;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;

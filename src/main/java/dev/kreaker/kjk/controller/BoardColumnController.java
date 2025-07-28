@@ -1,7 +1,7 @@
-package com.kanban.controller;
+package dev.kreaker.kjk.controller;
 
-import com.kanban.model.BoardColumn;
-import com.kanban.service.BoardColumnService;
+import dev.kreaker.kjk.model.BoardColumn;
+import dev.kreaker.kjk.service.BoardColumnService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
